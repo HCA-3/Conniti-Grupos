@@ -1,0 +1,475 @@
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: api-gateway
+    command:
+      - "--configfile=/etc/traefik/traefik.yml"
+    ports:
+      - "80:80"
+    volumes:
+      - ./traefik:/etc/traefik
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    networks:
+      - coniiti_net
+
+  shared-db:
+    image: postgres:16-alpine
+    container_name: shared-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-dev-postgres-password}
+      POSTGRES_DB: ${POSTGRES_DEFAULT_DB:-default_db}
+    volumes:
+      - shared_postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - coniiti_net
+
+  analytics-mongo:
+    image: mongo:7
+    container_name: analytics-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-analytics_db}
+    volumes:
+      - analytics_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping').ok\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - coniiti_net
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: shared-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - coniiti_net
+
+  auth-service:
+    build: ../backend/microservices/auth-service
+    container_name: auth-service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/authdb
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
+      USERS_SERVICE_URL: http://users-service:8000
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-coniiti_events}
+      SMTP_HOST: ${SMTP_HOST:-smtp.example.local}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-CONIITI}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost/api/auth/oauth/google/callback}
+      MICROSOFT_TENANT_ID: ${MICROSOFT_TENANT_ID:-common}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
+      MICROSOFT_REDIRECT_URI: ${MICROSOFT_REDIRECT_URI:-http://localhost/api/auth/oauth/microsoft/callback}
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    depends_on:
+      shared-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - coniiti_net
+
+  users-service:
+    build: ../backend/microservices/users-service
+    container_name: users-service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/usersdb
+      AUTH_SERVICE_URL: http://auth-service:8000
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    depends_on:
+      shared-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - coniiti_net
+
+  agenda-service:
+    build: ../backend/microservices/agenda-service
+    container_name: agenda-service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/agenda_db
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
+      AUTH_SERVICE_URL: http://auth-service:8000
+      FILES_SERVICE_URL: http://files-service:8000
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
+      ATTENDANCE_SIGNING_KEY: ${ATTENDANCE_SIGNING_KEY:-local-dev-attendance-signing-key-change-me}
+      AGENDA_MEDIA_ALLOWED_HOSTS: ${AGENDA_MEDIA_ALLOWED_HOSTS:-}
+      ASSET_REFERENCE_RECONCILER_ENABLED: ${ASSET_REFERENCE_RECONCILER_ENABLED:-true}
+      ASSET_REFERENCE_POLL_SECONDS: ${ASSET_REFERENCE_POLL_SECONDS:-15}
+      ASSET_REFERENCE_MAX_ATTEMPTS: ${ASSET_REFERENCE_MAX_ATTEMPTS:-8}
+      ASSET_REFERENCE_PROCESSING_LEASE_SECONDS: ${ASSET_REFERENCE_PROCESSING_LEASE_SECONDS:-120}
+      AGENDA_EVENT_OUTBOX_ENABLED: ${AGENDA_EVENT_OUTBOX_ENABLED:-true}
+      AGENDA_EVENT_OUTBOX_POLL_SECONDS: ${AGENDA_EVENT_OUTBOX_POLL_SECONDS:-10}
+      ATTENDANCE_REQUIRE_REGISTRATION: ${ATTENDANCE_REQUIRE_REGISTRATION:-true}
+      ASISTENCIA_CONFIRMADA_ENABLED: ${ASISTENCIA_CONFIRMADA_ENABLED:-true}
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    depends_on:
+      shared-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      files-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - coniiti_net
+
+  notifications-service:
+    build: ../backend/microservices/notifications-service
+    container_name: notifications-service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/notificationsdb
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-coniiti_events}
+      RABBITMQ_QUEUE: ${NOTIFICATIONS_RABBITMQ_QUEUE:-notifications_queue_v2}
+      RABBITMQ_DLX: ${RABBITMQ_DLX:-coniiti_events_dlx}
+      RABBITMQ_DLQ: ${NOTIFICATIONS_RABBITMQ_DLQ:-notifications_dead_letter}
+      AUTH_SERVICE_URL: http://auth-service:8000
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    depends_on:
+      shared-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - coniiti_net
+
+  payments-service:
+    build: ../backend/microservices/payments-service
+    container_name: payments-service
+    environment:
+      PAYMENTS_DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/paymentsdb
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
+      AUTH_SERVICE_URL: http://auth-service:8000
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
+      PAYMENT_PROVIDER_MODE: ${PAYMENT_PROVIDER_MODE:-mock}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN:-}
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    depends_on:
+      shared-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - coniiti_net
+
+  analytics-service:
+    build: ../backend/microservices/analytics-service
+    container_name: analytics-service
+    environment:
+      MONGO_URI: mongodb://analytics-mongo:27017/${MONGO_DB_NAME:-analytics_db}
+      MONGO_DB_NAME: ${MONGO_DB_NAME:-analytics_db}
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-coniiti_events}
+      RABBITMQ_QUEUE: ${ANALYTICS_RABBITMQ_QUEUE:-analytics_queue_v2}
+      RABBITMQ_DLX: ${RABBITMQ_DLX:-coniiti_events_dlx}
+      RABBITMQ_DLQ: ${ANALYTICS_RABBITMQ_DLQ:-analytics_dead_letter}
+      AUTH_SERVICE_URL: http://auth-service:8000
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    depends_on:
+      analytics-mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - coniiti_net
+
+  files-service:
+    build: ../backend/microservices/files-service
+    container_name: files-service
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
+      FILES_DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/filesdb
+      AUTH_SERVICE_URL: http://auth-service:8000
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
+      FILES_MAX_IMAGE_BYTES: ${FILES_MAX_IMAGE_BYTES:-26214400}
+      FILES_MAX_VIDEO_BYTES: ${FILES_MAX_VIDEO_BYTES:-536870912}
+      FILES_MAX_DOCUMENT_BYTES: ${FILES_MAX_DOCUMENT_BYTES:-52428800}
+      FILES_IMPORT_LEGACY_JSON: ${FILES_IMPORT_LEGACY_JSON:-true}
+    volumes:
+      - files_uploads:/app/uploads
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+    depends_on:
+      shared-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - coniiti_net
+
+  raffles-service:
+    build: ../backend/microservices/raffles-service
+    container_name: raffles-service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/rafflesdb
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
+      AUTH_SERVICE_URL: http://auth-service:8000
+      AGENDA_SERVICE_URL: http://agenda-service:8000
+      USERS_SERVICE_URL: http://users-service:8000
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-coniiti_events}
+      PREMIO_ADJUDICADO_ENABLED: ${PREMIO_ADJUDICADO_ENABLED:-true}
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    depends_on:
+      shared-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      users-service:
+        condition: service_healthy
+      agenda-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - coniiti_net
+
+  frontend:
+    build: ../frontend
+    container_name: frontend
+    deploy:
+      resources:
+        limits:
+          memory: 48M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      auth-service:
+        condition: service_healthy
+      users-service:
+        condition: service_healthy
+      agenda-service:
+        condition: service_healthy
+      notifications-service:
+        condition: service_healthy
+      payments-service:
+        condition: service_healthy
+      analytics-service:
+        condition: service_healthy
+      files-service:
+        condition: service_healthy
+      raffles-service:
+        condition: service_healthy
+    networks:
+      - coniiti_net
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./alertmanager:/etc/alertmanager:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--data.retention=120h'
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    networks:
+      - coniiti_net
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    depends_on:
+      - alertmanager
+    networks:
+      - coniiti_net
+
+  grafana:
+    image: grafana/grafana:10.4.1
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-coniiti-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Define GRAFANA_ADMIN_PASSWORD in .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    depends_on:
+      - prometheus
+    networks:
+      - coniiti_net
+
+networks:
+  coniiti_net:
+    driver: bridge
+
+volumes:
+  shared_postgres_data:
+  analytics_mongo_data:
+  rabbitmq_data:
+  files_uploads:
+  prometheus_data:
+  alertmanager_data:
+  grafana_data:

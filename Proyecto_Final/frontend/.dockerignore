@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.vite/
+.git/
+.env
+.env.*
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*

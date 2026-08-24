@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-postgres-init
+data:
+  init-db.sql: |
+    CREATE DATABASE usersdb;
+    CREATE DATABASE authdb;
+    CREATE DATABASE agenda_db;
+    CREATE DATABASE notificationsdb;
+    CREATE DATABASE paymentsdb;
+    CREATE DATABASE filesdb;
+    CREATE DATABASE rafflesdb;
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shared-postgres
+  labels:
+    app: shared-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shared-postgres
+  template:
+    metadata:
+      labels:
+        app: shared-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        resources:
+          requests:
+            memory: "192Mi"
+            cpu: "50m"
+          limits:
+            memory: "384Mi"
+            cpu: "300m"
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "admin"
+        - name: POSTGRES_DB
+          value: "default_db"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: shared-postgres-secret
+              key: POSTGRES_PASSWORD
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d
+        startupProbe:
+          exec:
+            command: ["pg_isready", "-U", "admin", "-d", "default_db"]
+          periodSeconds: 5
+          failureThreshold: 30
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "admin", "-d", "default_db"]
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command: ["pg_isready", "-U", "admin", "-d", "default_db"]
+          periodSeconds: 15
+          failureThreshold: 5
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: shared-postgres-pvc
+      - name: postgres-init
+        configMap:
+          name: shared-postgres-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shared-postgres-service
+spec:
+  type: ClusterIP
+  selector:
+    app: shared-postgres
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
