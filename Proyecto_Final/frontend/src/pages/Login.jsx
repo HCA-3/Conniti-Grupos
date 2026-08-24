@@ -140,15 +140,16 @@ export default function Login() {
         setIsLoading(true);
 
         if (rememberMe) {
-            localStorage.setItem('coniiti_saved_email', email);
+            localStorage.setItem('coniiti_saved_email', email.trim().toLowerCase());
         } else {
             localStorage.removeItem('coniiti_saved_email');
         }
 
         try {
-            const result = await login({ email, password });
+            const cleanEmail = email.trim().toLowerCase();
+            const result = await login({ email: cleanEmail, password });
             if (result?.requires_otp) {
-                const otpEmail = encodeURIComponent(result.email ?? email);
+                const otpEmail = encodeURIComponent(result.email ?? cleanEmail);
                 const otpPurpose = encodeURIComponent(result.purpose ?? 'login');
                 cacheOtpDebugInfo({
                     email: result.email ?? email,
