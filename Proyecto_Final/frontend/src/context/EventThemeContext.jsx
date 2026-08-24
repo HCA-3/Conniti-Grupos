@@ -96,6 +96,41 @@ function applyThemeVariables(theme) {
     root.dataset.guestAccents = theme.siteAccentsEnabled ? 'on' : 'off';
 }
 
+// ---------------------------------------------------------------
+// Grupo 1 personalization: inyecta variables CSS de colores y logos
+// Lee de localStorage (clave: site_config) sincronizado con
+// /api/files/site-config y el evento 'site-config-updated'.
+// ---------------------------------------------------------------
+const G1_DEFAULTS = {
+    custom_bg_color: '#0d2033',
+    custom_text_color: '#e2e8f0',
+    custom_header_bg: '#1f2a44',
+    custom_primary_color: '#2563EB',
+    custom_secondary_color: '#1E293B',
+    site_logo_uni: '/ucatolica-logo.png',
+    site_logo_evento: '/logo-coniiti.png',
+    site_banner: '/banner-header.png',
+};
+
+function applyGrupo1CustomVariables(config) {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    const merged = { ...G1_DEFAULTS, ...(config ?? {}) };
+    root.style.setProperty('--bg-custom', merged.custom_bg_color);
+    root.style.setProperty('--text-custom', merged.custom_text_color);
+    root.style.setProperty('--header-custom', merged.custom_header_bg);
+    root.style.setProperty('--primary-custom', merged.custom_primary_color);
+    root.style.setProperty('--secondary-custom', merged.custom_secondary_color);
+}
+
+function loadGrupo1ConfigFromStorage() {
+    try {
+        const raw = localStorage.getItem('site_config');
+        if (raw) return JSON.parse(raw);
+    } catch { /* ignore */ }
+    return null;
+}
+
 const EventThemeContext = createContext(null);
 
 export function EventThemeProvider({ children }) {
@@ -162,6 +197,20 @@ export function EventThemeProvider({ children }) {
     useEffect(() => {
         applyThemeVariables(theme);
     }, [theme]);
+
+    // ── Grupo 1 personalization ──────────────────────────────────────────
+    // Aplica variables CSS de colores customizados al montar y cuando
+    // cualquier componente emita el evento 'site-config-updated'.
+    useEffect(() => {
+        applyGrupo1CustomVariables(loadGrupo1ConfigFromStorage());
+
+        const handleSiteConfigUpdated = () => {
+            applyGrupo1CustomVariables(loadGrupo1ConfigFromStorage());
+        };
+
+        window.addEventListener('site-config-updated', handleSiteConfigUpdated);
+        return () => window.removeEventListener('site-config-updated', handleSiteConfigUpdated);
+    }, []);
 
     const saveConfiguration = useCallback(async (nextConfiguration, changeSummary) => {
         const writable = toWritableConfiguration(mergeConfiguration(nextConfiguration));

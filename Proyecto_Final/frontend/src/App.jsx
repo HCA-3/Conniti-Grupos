@@ -140,6 +140,10 @@ function AppLayout() {
     // Rutas de dashboard que ocupan ancho completo sin márgenes
     const isDashboard = location.pathname === '/staff' || location.pathname.startsWith('/superusuario');
 
+    // Roles con acceso a paneles administrativos (Grupo 1)
+    const SUPER_ADMIN_ROLES = ['SUPER_ADMIN', 'superuser'];
+    const STAFF_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CONTENT_MANAGER', 'VIEWER', 'superuser', 'staff'];
+
     return (
         <div className={styles.app}>
             <Navbar registeredCount={registeredIds.size} />
@@ -151,7 +155,7 @@ function AppLayout() {
                             <Route
                                 path="/staff"
                                 element={
-                                    <ProtectedRoute roles={['staff', 'superuser']}>
+                                    <ProtectedRoute roles={STAFF_ROLES}>
                                         <StaffDashboard />
                                     </ProtectedRoute>
                                 }
@@ -159,7 +163,7 @@ function AppLayout() {
                             <Route
                                 path="/superusuario/*"
                                 element={
-                                    <ProtectedRoute roles={['superuser']}>
+                                    <ProtectedRoute roles={SUPER_ADMIN_ROLES}>
                                         <SuperuserDashboard />
                                     </ProtectedRoute>
                                 }

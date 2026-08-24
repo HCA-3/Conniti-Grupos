@@ -9,6 +9,37 @@ const API_BASE = getApiBase();
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? '';
 const AUTH_BASE = `${API_BASE}/auth`;
 
+// ----------------------------------------------------------------
+// Mapeo canónico de roles: siempre operamos en UPPERCASE (Grupo 1)
+// ----------------------------------------------------------------
+export const ROLE_ALIASES = {
+    superuser: 'SUPER_ADMIN',
+    super_usuario: 'SUPER_ADMIN',
+    superusuario: 'SUPER_ADMIN',
+    staff: 'ADMIN',
+    administrador: 'ADMIN',
+    gestor: 'CONTENT_MANAGER',
+    gestor_contenido: 'CONTENT_MANAGER',
+    visualizador: 'VIEWER',
+    auditor: 'VIEWER',
+    university_community: 'ESTUDIANTE',
+    student: 'ESTUDIANTE',
+    external: 'EXTERNO',
+    invitado: 'EXTERNO',
+    profesor: 'DOCENTE',
+};
+
+export const ROLE_LABELS = {
+    SUPER_ADMIN: 'Superadministrador',
+    ADMIN: 'Administrador',
+    CONTENT_MANAGER: 'Gestor de Contenido',
+    VIEWER: 'Visualizador',
+    DOCENTE: 'Docente',
+    ESTUDIANTE: 'Estudiante',
+    EXTERNO: 'Externo',
+    USER: 'Usuario',
+};
+
 function normalizeUserRole(userData) {
     if (!userData || typeof userData !== 'object') {
         return userData;
@@ -18,9 +49,13 @@ function normalizeUserRole(userData) {
         return userData;
     }
 
+    const raw = userData.role.trim();
+    const upper = raw.toUpperCase();
+    const normalized = ROLE_ALIASES[raw.toLowerCase()] ?? upper;
+
     return {
         ...userData,
-        role: userData.role.trim().toLowerCase(),
+        role: normalized,
     };
 }
 

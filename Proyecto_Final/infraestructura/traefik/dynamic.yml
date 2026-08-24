@@ -1,7 +1,7 @@
 http:
   routers:
     metrics-denied-file:
-      rule: "PathRegexp(`^/api/(auth|users|committees|agenda|notifications|analytics|files|payments|raffles)/metrics/?$`)"
+      rule: "Path(`/api/auth/metrics`) || Path(`/api/users/metrics`) || Path(`/api/committees/metrics`) || Path(`/api/agenda/metrics`) || Path(`/api/notifications/metrics`) || Path(`/api/analytics/metrics`) || Path(`/api/files/metrics`) || Path(`/api/payments/metrics`) || Path(`/api/raffles/metrics`)"
       entryPoints:
         - web
       service: auth-svc

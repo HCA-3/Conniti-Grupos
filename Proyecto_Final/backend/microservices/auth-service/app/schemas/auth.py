@@ -17,7 +17,7 @@ class RegisterRequest(BaseModel):
     password: str = Field(..., min_length=8, max_length=128)
     name: Optional[str] = Field(default=None, min_length=2, max_length=255)
     full_name: Optional[str] = Field(default=None, min_length=2, max_length=255)
-    role: str = Field(default="external")
+    role: str = Field(default="EXTERNO")
     institution: Optional[str] = Field(default=None, max_length=255)
 
     @model_validator(mode="after")
@@ -58,9 +58,21 @@ class RegisterRequest(BaseModel):
     @field_validator("role")
     @classmethod
     def validate_role(cls, value: str) -> str:
-        normalized = _non_empty(value).lower()
-        if normalized not in {"university_community", "external"}:
-            raise ValueError("El auto-registro solo permite roles university_community o external.")
+        cleaned = _non_empty(value).strip()
+        ROLE_ALIASES = {
+            "university_community": "ESTUDIANTE",
+            "external": "EXTERNO",
+            "invitado": "EXTERNO",
+            "student": "ESTUDIANTE",
+            "profesor": "DOCENTE",
+        }
+        ALLOWED_SELF_REGISTER = {"ESTUDIANTE", "DOCENTE", "EXTERNO", "USER"}
+        upper = cleaned.upper()
+        normalized = ROLE_ALIASES.get(cleaned.lower(), upper)
+        if normalized not in ALLOWED_SELF_REGISTER:
+            raise ValueError(
+                "El auto-registro solo permite roles: ESTUDIANTE, DOCENTE, EXTERNO, USER."
+            )
         return normalized
 
 

@@ -17,13 +17,45 @@ PROFILE_OPTIONAL_FIELDS = (
 )
 
 
+ROLE_ALIASES = {
+    "super_admin": "SUPER_ADMIN",
+    "superadmin": "SUPER_ADMIN",
+    "superuser": "SUPER_ADMIN",
+    "super_usuario": "SUPER_ADMIN",
+    "superusuario": "SUPER_ADMIN",
+    "admin": "ADMIN",
+    "administrador": "ADMIN",
+    "content_manager": "CONTENT_MANAGER",
+    "gestor_contenido": "CONTENT_MANAGER",
+    "gestor": "CONTENT_MANAGER",
+    "viewer": "VIEWER",
+    "visualizador": "VIEWER",
+    "auditor": "VIEWER",
+    "staff": "ADMIN",
+    "docente": "DOCENTE",
+    "profesor": "DOCENTE",
+    "estudiante": "ESTUDIANTE",
+    "student": "ESTUDIANTE",
+    "university_community": "ESTUDIANTE",
+    "externo": "EXTERNO",
+    "invitado": "EXTERNO",
+    "external": "EXTERNO",
+    "user": "USER",
+}
+
+
 def _normalize_role(value: str | None) -> str | None:
     if value is None:
         return value
-    normalized = value.strip().lower()
-    if normalized not in [role.value for role in UserRole]:
-        raise ValueError(f"El rol debe ser uno de: {[role.value for role in UserRole]}")
-    return normalized
+    cleaned = value.strip()
+    upper = cleaned.upper()
+    valid_roles = {r.value for r in UserRole}
+    if upper in valid_roles:
+        return upper
+    lower = cleaned.lower()
+    if lower in ROLE_ALIASES:
+        return ROLE_ALIASES[lower]
+    return upper
 
 
 def _clean_optional(value: str | None) -> str | None:

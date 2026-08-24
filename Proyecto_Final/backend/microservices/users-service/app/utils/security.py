@@ -65,12 +65,13 @@ def get_current_user(request: Request) -> AuthenticatedUser:
                 detail="Auth devolvio un identificador de usuario invalido.",
             ) from exc
         role = payload.get("role")
-        if not isinstance(role, str) or role.strip().lower() not in {
-            "external",
-            "university_community",
-            "staff",
-            "superuser",
-        }:
+        VALID_ROLES = {
+            "super_admin", "admin", "content_manager", "viewer",
+            "docente", "estudiante", "externo", "user",
+            # legacy aliases
+            "superuser", "staff", "external", "university_community",
+        }
+        if not isinstance(role, str) or role.strip().lower() not in VALID_ROLES:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Auth devolvio un rol invalido.",
@@ -86,7 +87,7 @@ def get_current_user(request: Request) -> AuthenticatedUser:
             id=user_id,
             email=payload.get("email"),
             full_name=payload.get("full_name"),
-            role=role.strip().lower(),
+            role=role.strip().upper(),
             session_version=session_version,
         )
 
@@ -125,13 +126,29 @@ def get_current_user(request: Request) -> AuthenticatedUser:
     )
 
 
+SUPERADMIN_ROLES = {"SUPER_ADMIN", "SUPERUSER", "superuser", "super_admin"}
+STAFF_ROLES = SUPERADMIN_ROLES | {"ADMIN", "CONTENT_MANAGER", "VIEWER", "staff", "admin", "content_manager", "viewer"}
+
+
 def require_superuser(
     current_user: AuthenticatedUser = Depends(get_current_user),
 ) -> AuthenticatedUser:
-    if current_user.role != "superuser":
+    if current_user.role not in SUPERADMIN_ROLES:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acceso denegado. Se requiere rol de superusuario.",
+            detail="Acceso denegado. Se requiere rol de superadministrador.",
+        )
+    return current_user
+
+
+def require_staff(
+    current_user: AuthenticatedUser = Depends(get_current_user),
+) -> AuthenticatedUser:
+    """Permite: SUPER_ADMIN, ADMIN, CONTENT_MANAGER, VIEWER (y aliases legacy)."""
+    if current_user.role not in STAFF_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acceso denegado. Se requiere rol administrativo.",
         )
     return current_user
 

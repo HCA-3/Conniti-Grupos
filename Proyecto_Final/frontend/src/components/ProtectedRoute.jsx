@@ -1,20 +1,24 @@
-// ============================================================
-// Componente ProtectedRoute — CONIITI Front-end
-// Protege rutas según el estado de autenticación y roles.
-// Soporta uno o varios roles permitidos mediante un array.
-// Muestra un loader mientras se verifica la sesión.
-// ============================================================
-
 import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { ROLE_ALIASES } from '../services/authService';
 import styles from '../styles/components/ProtectedRoute.module.css';
+
+/**
+ * Normaliza un rol a su forma canónica (UPPERCASE Grupo 1).
+ * Acepta tanto el rol directo como sus aliases legacy.
+ */
+function canonicalRole(role) {
+    if (!role) return '';
+    const upper = role.trim().toUpperCase();
+    return ROLE_ALIASES[role.trim().toLowerCase()] ?? upper;
+}
 
 /**
  * ProtectedRoute — envuelve rutas que requieren autenticación y/o un rol específico.
  *
  * @param {{ children: React.ReactNode, roles?: string[] }} props
- *   - roles: array de roles permitidos (ej: ['staff', 'superuser']).
+ *   - roles: array de roles permitidos (ej: ['ADMIN', 'SUPER_ADMIN']).
  *            Si se omite, solo requiere que el usuario esté autenticado.
  */
 export default function ProtectedRoute({ children, roles }) {
@@ -35,8 +39,12 @@ export default function ProtectedRoute({ children, roles }) {
     }
 
     // Redirige al inicio si el rol del usuario no está en la lista permitida
-    if (roles && !roles.includes(user.role)) {
-        return <Navigate to="/" replace />;
+    if (roles) {
+        const userCanonical = canonicalRole(user.role);
+        const allowed = roles.map(canonicalRole);
+        if (!allowed.includes(userCanonical)) {
+            return <Navigate to="/" replace />;
+        }
     }
 
     return children;

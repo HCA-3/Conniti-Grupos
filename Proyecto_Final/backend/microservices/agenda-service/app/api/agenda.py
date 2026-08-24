@@ -61,6 +61,7 @@ def get_my_registered_sessions(
 
 
 @router.get("/", response_model=SessionListResponse)
+@router.get("/sessions", response_model=SessionListResponse)
 def list_sessions(
     day: Optional[str] = Query(None),
     modality: Optional[str] = Query(None),

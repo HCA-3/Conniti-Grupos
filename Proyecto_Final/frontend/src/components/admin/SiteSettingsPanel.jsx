@@ -33,10 +33,12 @@ export default function SiteSettingsPanel() {
     }, []);
 
     useEffect(() => {
-        if (user?.role === 'superuser') loadHistory();
+        const SUPER_ADMIN_ROLES = new Set(['SUPER_ADMIN', 'superuser']);
+        if (SUPER_ADMIN_ROLES.has(user?.role)) loadHistory();
     }, [loadHistory, user?.role]);
 
-    if (user?.role !== 'superuser') return null;
+    const isSuperAdmin = new Set(['SUPER_ADMIN', 'superuser']).has(user?.role);
+    if (!isSuperAdmin) return null;
 
     const publish = async () => {
         setSaving(true);
