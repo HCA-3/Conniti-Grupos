@@ -34,7 +34,7 @@ Muestra solo las sesiones pre-inscritas por el usuario (`registeredIds`). Usa `<
 **Archivo:** `src/pages/Login.jsx`
 
 Formulario de login con fondo animado de partículas (tsParticles). Lógica:
-- Email `admin@coniiti.edu.co` → rol `staff` → redirige a `/staff`
+- Email `admin@coniiti.com` → rol `staff` → redirige a `/staff`
 - Cualquier otro email → rol `normal` → redirige a `/`
 
 ---
@@ -44,7 +44,7 @@ Formulario de login con fondo animado de partículas (tsParticles). Lógica:
 
 Formulario de registro de nuevo usuario con fondo de partículas idéntico al login.  
 Campos: Nombre, Apellido, Correo, Institución, Tipo de Participante, Contraseña, Confirmar Contraseña.  
-Tipos de participante: `Staff`, `Comunidad Interna`, `Externo`.  
+Tipos de participante: `Staff`, `Estudiante / Docente`, `Externo`.  
 Validación: contraseñas coincidentes, mínimo 6 caracteres.  
 Al completar → redirige a `/login`.
 

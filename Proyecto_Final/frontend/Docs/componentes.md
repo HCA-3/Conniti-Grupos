@@ -9,7 +9,7 @@ Barra de navegación sticky con logo, menú de links, buscador y controles de au
 - Si `user.isLoggedIn === false` → muestra botón **"Iniciar Sesión"**
 - Si `user.isLoggedIn === true`:
   - Muestra nombre del usuario (`user.data.name`)
-  - Si `user.role === 'staff'` → muestra enlace **"Panel Staff"**
+  - Si `user.role === 'ADMIN', 'CONTENT_MANAGER', 'VIEWER'` → muestra enlace **"Panel Staff"**
   - Muestra botón **"Cerrar Sesión"**
 
 ---

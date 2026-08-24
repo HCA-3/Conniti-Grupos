@@ -188,8 +188,7 @@ def mark_user_verified(user: AuthUser, db: Session) -> AuthUser:
 
 
 def requires_login_otp(user: AuthUser, role: str) -> bool:
-    normalized_role = role.strip().lower()
-    return (not user.is_verified) or normalized_role in {"staff", "superuser"}
+    return False
 
 
 def _hash_reset_token(token: str) -> str:

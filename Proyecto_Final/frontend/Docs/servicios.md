@@ -128,7 +128,7 @@ Provee el estado de autenticación a toda la app.
 // Estructura del estado "user":
 {
   isLoggedIn: boolean,
-  role: 'staff' | 'normal' | null,
+  role: 'ADMIN', 'CONTENT_MANAGER', 'VIEWER' | 'USER', 'ESTUDIANTE', 'EXTERNO' | null,
   data: { name: string } | null
 }
 

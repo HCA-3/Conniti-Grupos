@@ -60,5 +60,5 @@ CONIITI Front-end es una **Single Page Application (SPA)** construida con React 
 
 | Email | Contraseña | Rol | Redirige a |
 |---|---|---|---|
-| `admin@coniiti.edu.co` | cualquiera | Staff | `/staff` |
+| `admin@coniiti.com` | cualquiera | Staff | `/staff` |
 | cualquier otro email | cualquiera | Normal | `/` |

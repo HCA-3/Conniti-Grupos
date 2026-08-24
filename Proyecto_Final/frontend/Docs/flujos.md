@@ -34,7 +34,7 @@ Clic en "Ver Agenda" o link Navbar
 ## Flujo 2: Staff administrando sesiones
 
 ```
-/login → ingresa admin@coniiti.edu.co
+/login → ingresa admin@coniiti.com
     │
     ▼
 Redirige automáticamente a /staff

@@ -10,10 +10,10 @@ La autenticación es **simulada** en el front-end hasta que se integre el backen
 Usuario ingresa email + contraseña
          │
          ▼
-¿email === 'admin@coniiti.edu.co'?
+¿email === 'admin@coniiti.com'?
     │ Sí                      │ No
     ▼                         ▼
-login('staff')           login('normal')
+login('ADMIN', 'CONTENT_MANAGER', 'VIEWER')           login('USER', 'ESTUDIANTE', 'EXTERNO')
 navigate('/staff')       navigate('/')
 ```
 
@@ -102,8 +102,8 @@ const isStaff = location.pathname === '/staff';
 
 | Rol | Valor | Acceso |
 |---|---|---|
-| Staff | `'staff'` | Agenda, Mis Conferencias, Panel de Staff |
-| Normal | `'normal'` | Agenda, Mis Conferencias |
+| Staff | `'ADMIN', 'CONTENT_MANAGER', 'VIEWER'` | Agenda, Mis Conferencias, Panel de Staff |
+| Normal | `'USER', 'ESTUDIANTE', 'EXTERNO'` | Agenda, Mis Conferencias |
 | Sin sesión | `null` | Agenda (solo lectura), Login, Registro |
 
 ---
