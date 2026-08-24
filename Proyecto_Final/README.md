@@ -1,7 +1,7 @@
 ﻿# CONIITI — Congreso Internacional de Ingeniería en Tecnologías de la Información
 
 Plataforma web integral para la gestión y participación en el Congreso Internacional CONIITI. Desarrollada con arquitectura de microservicios, sistema de roles Grupo 1, personalización dinámica de la interfaz y soporte completo de sedes multimedia.
-
+ 
 ---
 
 ## 📋 Tabla de contenidos
