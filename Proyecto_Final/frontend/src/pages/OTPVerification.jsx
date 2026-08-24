@@ -13,7 +13,11 @@ import { loginParticlesConfig } from '../utils/particlesConfig';
 import styles from '../styles/pages/OTPVerification.module.css';
 
 function getDestinationForUser(userData) {
-    return userData.role === 'superuser' ? '/superusuario' : userData.role === 'staff' ? '/staff' : '/';
+    const SUPER_ADMIN_ROLES = new Set(['SUPER_ADMIN', 'superuser']);
+    const STAFF_ROLES = new Set(['ADMIN', 'CONTENT_MANAGER', 'VIEWER', 'staff']);
+    if (SUPER_ADMIN_ROLES.has(userData.role)) return '/superusuario';
+    if (STAFF_ROLES.has(userData.role)) return '/staff';
+    return '/';
 }
 
 export default function OTPVerification() {

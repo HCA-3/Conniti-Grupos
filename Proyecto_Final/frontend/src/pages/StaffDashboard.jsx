@@ -32,7 +32,7 @@ const BASE_TABS = [
 
 export default function StaffDashboard() {
     const { user } = useAuth();
-    const isSuperuser = user && user.role === 'superuser';
+    const isSuperuser = user && new Set(['SUPER_ADMIN', 'superuser']).has(user.role);
 
     const [sessions, setSessions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

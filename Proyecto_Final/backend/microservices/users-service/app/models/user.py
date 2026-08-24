@@ -21,7 +21,7 @@ class User(Base):
     role = Column(
         Enum(UserRole, native_enum=False, values_callable=lambda x: [e.value for e in x]),
         nullable=False,
-        default=UserRole.EXTERNAL,
+        default=UserRole.EXTERNO,
     )
     institution = Column(String, nullable=True)
     career = Column(String(255), nullable=True)

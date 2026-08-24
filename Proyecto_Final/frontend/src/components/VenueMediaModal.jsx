@@ -3,9 +3,46 @@ import { FiChevronLeft, FiChevronRight, FiExternalLink, FiMapPin, FiX } from 're
 
 import styles from '../styles/components/VenueMediaModal.module.css';
 
+/** Converts any YouTube watch/short URL to an embed URL. Returns null if not YouTube. */
+function toYouTubeEmbed(url) {
+    if (!url) return null;
+    try {
+        const parsed = new URL(url);
+        const host = parsed.hostname.replace('www.', '');
+        if (host === 'youtube.com' && parsed.searchParams.get('v')) {
+            return `https://www.youtube.com/embed/${parsed.searchParams.get('v')}`;
+        }
+        if (host === 'youtu.be') {
+            return `https://www.youtube.com/embed${parsed.pathname}`;
+        }
+        if (host === 'youtube.com' && parsed.pathname.startsWith('/embed')) {
+            return url;
+        }
+    } catch { /* not a valid absolute URL */ }
+    return null;
+}
+
 
 function Resource({ resource, poster }) {
     if (!resource) return <p className={styles.empty}>Esta sede aún no tiene recursos publicados.</p>;
+
+    // YouTube embed — works for both resource_type 'video' and 'link'
+    const youtubeEmbed = toYouTubeEmbed(resource.url || resource.external_url);
+    if (youtubeEmbed && (resource.resource_type === 'video' || resource.resource_type === 'link')) {
+        return (
+            <div className={styles.iframeWrapper}>
+                <iframe
+                    key={resource.id}
+                    src={youtubeEmbed}
+                    className={styles.media}
+                    title={resource.alt_text || resource.title || 'Video sede'}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                />
+            </div>
+        );
+    }
+
     if (resource.resource_type === 'video') {
         return (
             <video

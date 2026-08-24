@@ -5,12 +5,19 @@ import { listProfiles, updateProfileAsAdmin } from '../../services/userService';
 import styles from '../../styles/components/AdminManagement.module.css';
 
 
+// Roles del sistema Grupo 1 — mapeo a etiqueta en español
 const ROLE_LABELS = {
-    external: 'Externo',
-    university_community: 'Comunidad universitaria',
-    staff: 'Staff',
-    superuser: 'Superusuario',
+    SUPER_ADMIN: 'Superadministrador',
+    ADMIN: 'Administrador',
+    CONTENT_MANAGER: 'Gestor de Contenido',
+    VIEWER: 'Visualizador',
+    DOCENTE: 'Docente',
+    ESTUDIANTE: 'Estudiante',
+    EXTERNO: 'Externo',
+    USER: 'Usuario',
 };
+
+const ADMIN_ROLES = new Set(['SUPER_ADMIN', 'ADMIN', 'superuser', 'staff']);
 
 
 export default function UserAdminPanel() {
@@ -89,7 +96,7 @@ export default function UserAdminPanel() {
                                 {result.items.map((user) => (
                                     <tr key={user.id} className={user.is_active ? '' : styles.inactive}>
                                         <td><strong>{user.full_name}</strong><div className={styles.muted}>{user.email}</div></td>
-                                        <td><span className={`${styles.badge} ${user.role === 'superuser' ? styles.badgeAdmin : ''}`}>{ROLE_LABELS[user.role] ?? user.role}</span></td>
+                                        <td><span className={`${styles.badge} ${ADMIN_ROLES.has(user.role) ? styles.badgeAdmin : ''}`}>{ROLE_LABELS[user.role] ?? user.role}</span></td>
                                         <td>{user.institution || '-'}<div className={styles.muted}>{user.career || ''}</div></td>
                                         <td>{user.profile_completed ? <span className={styles.badge}>Completo</span> : <span className={`${styles.badge} ${styles.badgeMuted}`}>Pendiente</span>}</td>
                                         <td>{user.is_active ? 'Activo' : 'Inactivo'}</td>

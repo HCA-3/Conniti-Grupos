@@ -172,16 +172,20 @@ const navBtnStyle = {
 
 function getUserHubPath(user) {
     if (!user) return '/register';
-    if (user.role === 'superuser') return '/superusuario';
-    if (user.role === 'staff') return '/staff';
+    const SUPER_ADMIN = new Set(['SUPER_ADMIN', 'superuser']);
+    const STAFF = new Set(['ADMIN', 'CONTENT_MANAGER', 'VIEWER', 'staff']);
+    if (SUPER_ADMIN.has(user.role)) return '/superusuario';
+    if (STAFF.has(user.role)) return '/staff';
     return '/mis-conferencias';
 }
 
 
 function getUserHubLabel(user) {
     if (!user) return 'Crear cuenta';
-    if (user.role === 'superuser') return 'Ir al centro de control';
-    if (user.role === 'staff') return 'Ir al centro de gestión';
+    const SUPER_ADMIN = new Set(['SUPER_ADMIN', 'superuser']);
+    const STAFF = new Set(['ADMIN', 'CONTENT_MANAGER', 'VIEWER', 'staff']);
+    if (SUPER_ADMIN.has(user.role)) return 'Ir al centro de control';
+    if (STAFF.has(user.role)) return 'Ir al centro de gestión';
     return 'Ir a mis conferencias';
 }
 
@@ -195,7 +199,10 @@ function getAccessHighlights(user) {
         ];
     }
 
-    if (user.role === 'superuser') {
+    const SUPER_ADMIN = new Set(['SUPER_ADMIN', 'superuser']);
+    const STAFF = new Set(['ADMIN', 'CONTENT_MANAGER', 'VIEWER', 'staff']);
+
+    if (SUPER_ADMIN.has(user.role)) {
         return [
             'Acceso al centro de supervisión del congreso',
             'Vista general de la programación y del equipo',
@@ -203,7 +210,7 @@ function getAccessHighlights(user) {
         ];
     }
 
-    if (user.role === 'staff') {
+    if (STAFF.has(user.role)) {
         return [
             'Acceso directo al centro operativo',
             'Gestión de sesiones, contenido y archivos',

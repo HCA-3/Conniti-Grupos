@@ -15,7 +15,7 @@ export default function Register() {
         apellido: '',
         email: '',
         institucion: '',
-        tipoUsuario: 'external',
+        tipoUsuario: 'EXTERNO',
         password: '',
         confirmPassword: '',
         acceptPolicy: false,
@@ -167,8 +167,10 @@ export default function Register() {
                             onChange={handleChange}
                             required
                         >
-                            <option value="university_community">Comunidad interna (estudiante / docente)</option>
-                            <option value="external">Externo</option>
+                            <option value="ESTUDIANTE">Estudiante (comunidad universitaria)</option>
+                            <option value="DOCENTE">Docente / Profesor</option>
+                            <option value="EXTERNO">Externo / Profesional</option>
+                            <option value="USER">Usuario general</option>
                         </select>
                     </div>
 

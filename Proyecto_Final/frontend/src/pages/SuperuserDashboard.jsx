@@ -6,6 +6,7 @@ import { listStaff, createStaff, updateStaff, deleteStaff } from '../services/us
 import StaffFormModal from '../components/StaffFormModal';
 import StaffDashboard from './StaffDashboard';
 import SiteSettingsPanel from '../components/admin/SiteSettingsPanel';
+import Grupo1PersonalizationPanel from '../components/admin/Grupo1PersonalizationPanel';
 import UserAdminPanel from '../components/admin/UserAdminPanel';
 import CommitteeManager from '../components/admin/CommitteeManager';
 import GroupManager from '../components/admin/GroupManager';
@@ -82,6 +83,7 @@ export default function SuperuserDashboard() {
             {activeTab === 'admin' && <StaffDashboard />}
             {activeTab === 'customization' && (
                 <div className={styles.panelStack}>
+                    <Grupo1PersonalizationPanel />
                     <SiteSettingsPanel />
                 </div>
             )}
