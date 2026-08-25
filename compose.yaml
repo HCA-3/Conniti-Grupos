@@ -1,0 +1,4 @@
+name: coniiti
+
+include:
+  - path: infraestructura/docker-compose.yml

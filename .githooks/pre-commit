@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+repository_root=$(git rev-parse --show-toplevel)
+snapshot_script="$repository_root/infraestructura/scripts/snapshot-databases.ps1"
+
+if command -v pwsh >/dev/null 2>&1; then
+  pwsh -NoProfile -File "$snapshot_script"
+elif command -v powershell.exe >/dev/null 2>&1; then
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$snapshot_script"
+else
+  echo "PowerShell is required to update the database snapshots." >&2
+  exit 1
+fi
+
+git add -- \
+  infraestructura/database-snapshots/authdb.dump \
+  infraestructura/database-snapshots/usersdb.dump \
+  infraestructura/database-snapshots/agenda_db.dump \
+  infraestructura/database-snapshots/notificationsdb.dump \
+  infraestructura/database-snapshots/paymentsdb.dump \
+  infraestructura/database-snapshots/filesdb.dump \
+  infraestructura/database-snapshots/rafflesdb.dump \
+  infraestructura/database-snapshots/analytics_db.archive \
+  infraestructura/database-snapshots/manifest.json
