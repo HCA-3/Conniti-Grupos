@@ -1,0 +1,14 @@
+﻿{
+    "generated_at_utc":  "2026-08-25T00:23:28.8486220Z",
+    "postgres_databases":  [
+                               "authdb",
+                               "usersdb",
+                               "agenda_db",
+                               "notificationsdb",
+                               "paymentsdb",
+                               "filesdb",
+                               "rafflesdb"
+                           ],
+    "mongo_database":  "analytics_db",
+    "warning":  "Snapshot temporal de desarrollo; contiene datos completos y no debe publicarse en un repositorio abierto."
+}

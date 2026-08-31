@@ -1,0 +1,371 @@
+/* SitePersonalizationPanel.module.css */
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-custom, #2563EB);
+    margin: 0 0 0.25rem;
+}
+
+.header p {
+    color: var(--text-custom, #94a3b8);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.section {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 1.25rem;
+    color: var(--primary-custom, #60a5fa);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* ── Colores ──────────────────────────────────── */
+.colorGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 1rem;
+}
+
+.colorField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--text-custom, #94a3b8);
+    font-weight: 500;
+}
+
+.colorRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.colorSwatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.15);
+    cursor: pointer;
+    padding: 0;
+    background: none;
+    overflow: hidden;
+}
+
+.hexInput {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    color: inherit;
+    font-size: 0.82rem;
+    font-family: monospace;
+}
+
+/* ── Preview ──────────────────────────────────── */
+.preview {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+    font-size: 0.9rem;
+}
+
+.previewHeader {
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+}
+
+.previewBody {
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.previewPrimary,
+.previewSecondary {
+    border: none;
+    padding: 0.45rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ── Temas ────────────────────────────────────── */
+.themeGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.themeCard {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.themeSwatches {
+    display: flex;
+    gap: 4px;
+}
+
+.miniSwatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+}
+
+.themeName {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-custom, #e2e8f0);
+}
+
+.themeActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.themeActions button {
+    flex: 1;
+    padding: 0.3rem;
+    font-size: 0.78rem;
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: var(--text-custom, #e2e8f0);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.themeActions button:hover {
+    background: rgba(255,255,255,0.12);
+}
+
+.addThemeRow {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.addThemeRow input {
+    flex: 1;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-custom, #e2e8f0);
+    font-size: 0.85rem;
+}
+
+.addThemeRow button {
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    border: none;
+    background: var(--primary-custom, #2563EB);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* ── Assets ───────────────────────────────────── */
+.assetGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.assetCard {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.assetLabel {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-custom, #60a5fa);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.assetPreview {
+    max-height: 80px;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+}
+
+.uploadBtn {
+    padding: 0.35rem 0.7rem;
+    border-radius: 6px;
+    border: 1px dashed rgba(255,255,255,0.25);
+    background: transparent;
+    color: var(--text-custom, #94a3b8);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.uploadBtn:hover {
+    border-color: var(--primary-custom, #2563EB);
+}
+
+.urlInput {
+    width: 100%;
+    padding: 0.3rem 0.5rem;
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: var(--text-custom, #e2e8f0);
+    font-size: 0.75rem;
+    box-sizing: border-box;
+}
+
+/* ── Capacidades ──────────────────────────────── */
+.venueList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.venueRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
+.venueName {
+    flex: 1;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-custom, #e2e8f0);
+    text-transform: capitalize;
+}
+
+.capacityInput {
+    width: 80px;
+    padding: 0.3rem 0.4rem;
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: var(--text-custom, #e2e8f0);
+    font-size: 0.85rem;
+    text-align: right;
+}
+
+.capacityUnit {
+    font-size: 0.78rem;
+    color: var(--text-custom, #64748b);
+}
+
+.addVenueRow {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.addVenueRow input[type="text"] {
+    flex: 1;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: var(--text-custom, #e2e8f0);
+    font-size: 0.85rem;
+}
+
+.addVenueRow button {
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    border: none;
+    background: var(--primary-custom, #2563EB);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* ── Acciones globales ────────────────────────── */
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.saveBtn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary-custom, #2563EB);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.saveBtn:hover { opacity: 0.88; }
+
+.resetBtn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: var(--text-custom, #94a3b8);
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.resetBtn:hover { background: rgba(255,255,255,0.07); }
+
+.danger {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.danger:hover { background: rgba(239, 68, 68, 0.25) !important; }
