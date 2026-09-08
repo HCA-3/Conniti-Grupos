@@ -51,7 +51,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check Deployment Secrets
+        id: check_secrets
+        run: |
+          if [ -z "${{ secrets.SERVER_HOST }}" ]; then
+            echo "::warning ::SERVER_HOST no está configurado en los Secrets del repositorio. Se omite el despliegue SSH."
+            echo "has_secrets=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_secrets=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy to Remote Server via SSH
+        if: steps.check_secrets.outputs.has_secrets == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
