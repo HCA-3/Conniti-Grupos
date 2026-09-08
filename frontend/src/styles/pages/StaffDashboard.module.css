@@ -278,37 +278,49 @@
 }
 
 .editBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
     background: rgba(31, 105, 182, 0.1);
     color: var(--color-primary);
     border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    padding: 0.5rem 0.95rem;
+    min-height: 36px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.15s;
     white-space: nowrap;
 }
 
 .editBtn:hover {
     background: rgba(31, 105, 182, 0.2);
+    transform: translateY(-1px);
 }
 
 .deleteBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
     background: rgba(239, 68, 68, 0.1);
     color: #dc2626;
     border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    padding: 0.5rem 0.95rem;
+    min-height: 36px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.15s;
     white-space: nowrap;
 }
 
 .deleteBtn:hover {
     background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
 }
 
 /* ── Celda de Enlace Virtual ── */
@@ -322,10 +334,12 @@
 .unverifiedBtn {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.3rem 0.7rem;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    min-height: 34px;
     border-radius: 99px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
     border: none;

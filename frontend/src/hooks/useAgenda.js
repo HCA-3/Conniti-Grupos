@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { filterSessions, getAgendaConfiguration, getVenues } from '../services/agendaService';
 
@@ -19,6 +20,7 @@ function formatDays(configuration) {
 
 
 export function useAgenda() {
+    const location = useLocation();
     const [configuration, setConfiguration] = useState(null);
     const [venues, setVenues] = useState([]);
     const [activeDay, setActiveDay] = useState(null);
@@ -26,7 +28,16 @@ export function useAgenda() {
     const [activeEventType, setActiveEventType] = useState(null);
     const [activeRoom, setActiveRoom] = useState(null);
     const [activeVenueId, setActiveVenueId] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(() => {
+        return new URLSearchParams(location.search).get('search') || '';
+    });
+
+    useEffect(() => {
+        const searchParam = new URLSearchParams(location.search).get('search');
+        if (searchParam !== null) {
+            setSearchQuery(searchParam);
+        }
+    }, [location.search]);
     const [sessions, setSessions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');

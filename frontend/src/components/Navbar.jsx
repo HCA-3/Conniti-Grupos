@@ -53,6 +53,13 @@ export default function Navbar({ registeredCount = 0 }) {
     }).filter(Boolean);
 
     useEffect(() => {
+        const queryParam = new URLSearchParams(location.search).get('search');
+        if (queryParam !== null) {
+            setSearchQuery(queryParam);
+        }
+    }, [location.search]);
+
+    useEffect(() => {
         const handleClickOutside = (event) => {
             if (navbarRef.current && !navbarRef.current.contains(event.target)) {
                 setOpenDropdown(null);
@@ -68,6 +75,18 @@ export default function Navbar({ registeredCount = 0 }) {
         setOpenDropdown(null);
     };
 
+    const handleSearchSubmit = (event) => {
+        event.preventDefault();
+        const trimmed = searchQuery.trim();
+        if (trimmed) {
+            navigate(`/agenda?search=${encodeURIComponent(trimmed)}`);
+            closeMenu();
+        } else {
+            navigate('/agenda');
+            closeMenu();
+        }
+    };
+
     return (
         <nav className={styles.navbar} ref={navbarRef}>
             <Link to="/" className={styles.brand} onClick={closeMenu}>
@@ -81,6 +100,21 @@ export default function Navbar({ registeredCount = 0 }) {
             </Link>
 
             <ul className={`${styles.links} ${menuOpen ? styles.linksOpen : ''}`}>
+                <li className={styles.mobileSearchItem}>
+                    <form onSubmit={handleSearchSubmit} className={styles.mobileSearchForm}>
+                        <input
+                            type="text"
+                            placeholder="Buscar en CONIITI..."
+                            className={styles.mobileSearchInput}
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
+                        />
+                        <button type="submit" className={styles.mobileSearchBtn} aria-label="Buscar">
+                            <FiSearch size={16} />
+                        </button>
+                    </form>
+                </li>
+
                 {visibleLinks.map((link) => {
                     if (link.dropdown) {
                         const isActive = activePage === link.path || link.dropdown.some((subLink) => activePage === subLink.path);
@@ -139,11 +173,40 @@ export default function Navbar({ registeredCount = 0 }) {
                         </li>
                     );
                 })}
+
+                {user && (
+                    <li className={styles.mobileUserSection}>
+                        <div className={styles.mobileUserInfo}>
+                            <span>Sesión: <strong>{user.full_name}</strong></span>
+                        </div>
+                        <div className={styles.mobileUserLinks}>
+                            {(user.role === 'SUPER_ADMIN' || user.role === 'ADMIN') && (
+                                <Link to="/superusuario" className={styles.mobileUserLink} onClick={closeMenu}>
+                                    Panel de gestión
+                                </Link>
+                            )}
+                            <Link to="/perfil" className={styles.mobileUserLink} onClick={closeMenu}>
+                                Mi perfil
+                            </Link>
+                            <Link to="/mis-grupos" className={styles.mobileUserLink} onClick={closeMenu}>
+                                Mis grupos
+                            </Link>
+                            <button
+                                className={styles.mobileLogoutBtn}
+                                onClick={() => { logout(); closeMenu(); navigate('/'); }}
+                            >
+                                Cerrar sesión
+                            </button>
+                        </div>
+                    </li>
+                )}
             </ul>
 
             <div className={styles.rightControls}>
-                <div className={styles.searchWrapper}>
-                    <FiSearch className={styles.searchIcon} />
+                <form onSubmit={handleSearchSubmit} className={styles.searchWrapper}>
+                    <button type="submit" className={styles.searchSubmitBtn} aria-label="Buscar">
+                        <FiSearch className={styles.searchIcon} />
+                    </button>
                     <input
                         type="text"
                         placeholder="Buscar en CONIITI..."
@@ -151,17 +214,15 @@ export default function Navbar({ registeredCount = 0 }) {
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
                     />
-                </div>
+                </form>
 
                 <div className={styles.authWrapper}>
                     {user ? (
                         <div className={styles.userProfile}>
                             {user.role === 'SUPER_ADMIN' && (
-                                <>
-                                    <Link to="/superusuario" className={styles.staffLink} onClick={closeMenu}>
-                                        Panel general
-                                    </Link>
-                                </>
+                                <Link to="/superusuario" className={styles.staffLink} onClick={closeMenu}>
+                                    Panel general
+                                </Link>
                             )}
                             {user.role === 'ADMIN' && (
                                 <Link to="/superusuario" className={styles.staffLink} onClick={closeMenu}>

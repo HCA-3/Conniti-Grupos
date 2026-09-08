@@ -80,6 +80,18 @@ button {
     outline: none;
     background: none;
     font-size: var(--font-size-sm);
+    transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    touch-action: manipulation;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
 }
 
 ul,

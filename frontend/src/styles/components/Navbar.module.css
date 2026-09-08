@@ -240,21 +240,39 @@
     margin-left: 1rem;
     width: 240px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.searchSubmitBtn {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 50%;
+    transition: color 0.2s ease;
+    z-index: 2;
+}
+
+.searchSubmitBtn:hover {
+    color: var(--color-accent);
 }
 
 .searchIcon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.45);
-    pointer-events: none;
     font-size: 0.95rem;
 }
 
 .searchInput {
     width: 100%;
-    padding: 8px 12px 8px 38px;
+    padding: 8px 12px 8px 34px;
     background: rgba(255, 255, 255, 0.08);
     border: 1.5px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-full);
@@ -274,6 +292,90 @@
     background: rgba(255, 255, 255, 0.12);
     border-color: var(--color-accent);
     box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
+}
+
+/* ── Elementos Móviles dentro del Menú Desplegable ── */
+.mobileSearchItem {
+    display: none;
+    padding: 0.5rem 0;
+}
+
+.mobileSearchForm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    width: 100%;
+}
+
+.mobileSearchInput {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: #fff;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.mobileSearchBtn {
+    background: var(--color-accent);
+    color: var(--color-primary-dark);
+    border: none;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.mobileUserSection {
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.mobileUserInfo {
+    font-size: 0.85rem;
+    color: var(--color-accent);
+    padding: 0 0.5rem;
+}
+
+.mobileUserLinks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.mobileUserLink {
+    display: block;
+    padding: 0.55rem 0.85rem;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.mobileLogoutBtn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.55rem 0.85rem;
+    background: rgba(196, 30, 47, 0.2);
+    color: #ff8a8a;
+    border: 1px solid rgba(196, 30, 47, 0.4);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 /* ── Responsivo Medio (Tablets/iPads) ── */
@@ -327,7 +429,6 @@
         flex-wrap: wrap;
         height: auto;
         padding: 0.5rem 1rem;
-        /* Reduciendo padding horizontal */
         width: 100%;
         box-sizing: border-box;
     }
@@ -340,6 +441,14 @@
 
     .searchWrapper {
         display: none;
+    }
+
+    .mobileSearchItem {
+        display: block;
+    }
+
+    .mobileUserSection {
+        display: flex;
     }
 
     .links {
