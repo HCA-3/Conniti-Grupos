@@ -5,7 +5,7 @@ services:
     command:
       - "--configfile=/etc/traefik/traefik.yml"
     ports:
-      - "80:80"
+      - "${HTTP_PORT:-8080}:80"
     volumes:
       - ./traefik:/etc/traefik
     deploy:
